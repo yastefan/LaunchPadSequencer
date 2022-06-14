@@ -15,6 +15,13 @@
 //==============================================================================
 /*
 */
+
+static struct LaunchPadCommand : juce::MidiMessage
+{
+    MidiMessage setProgrammerMode = createSysExMessage("\x00\x20\x29\x02\x0c\x0e\x01", 7);
+    MidiMessage setLiveMode = createSysExMessage("\x00\x20\x29\x02\x0c\x0e\x00", 7);
+};
+
 struct MidiDeviceListEntry : juce::ReferenceCountedObject
 {
     MidiDeviceListEntry(juce::MidiDeviceInfo info) : deviceInfo(info) {}
@@ -59,6 +66,11 @@ private:
         bool isInput;
         juce::SparseSet<int> lastSelectedItems;
     };
+    LaunchPadCommand launchPadCommand;
+
+    juce::Label midiInputLabel{ "Midi Input Label",  "MIDI Input:" };
+    juce::Label midiOutputLabel{ "Midi Output Label", "MIDI Output:" };
+    juce::TextButton refreshButton{ "Refresh" };
 
     std::unique_ptr<MidiDeviceListBox> midiInputSelector, midiOutputSelector;
     juce::ReferenceCountedArray<MidiDeviceListEntry> midiInputs, midiOutputs;
@@ -69,6 +81,7 @@ private:
     juce::ReferenceCountedObjectPtr<MidiDeviceListEntry> findDevice(juce::MidiDeviceInfo, bool) const;
     void closeUnpluggedDevices(const juce::Array<juce::MidiDeviceInfo>&, bool);
     void updateDeviceList(bool);
+    void selectMidiControllerByName(const juce::String& name);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiComponent)
 };

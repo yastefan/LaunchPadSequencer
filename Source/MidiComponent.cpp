@@ -18,13 +18,26 @@ MidiComponent::MidiComponent() :
 {
     updateDeviceList(true);
     updateDeviceList(false);
+
+    addAndMakeVisible(midiInputLabel);
+    addAndMakeVisible(midiOutputLabel);
+    addAndMakeVisible(refreshButton);
     addAndMakeVisible(midiInputSelector.get());
     addAndMakeVisible(midiOutputSelector.get());
+
+    refreshButton.onClick = [this]
+    {
+        sendToOutputs(launchPadCommand.setProgrammerMode);
+        updateDeviceList(true);
+        updateDeviceList(false);
+    };
+
     setSize(732, 520);
 }
 
 MidiComponent::~MidiComponent()
 {
+    sendToOutputs(launchPadCommand.setLiveMode);
     midiInputs.clear();
     midiOutputs.clear();
 
@@ -41,19 +54,23 @@ void MidiComponent::paint (juce::Graphics& g)
 
     g.setColour (juce::Colours::white);
     g.setFont (14.0f);
-    g.drawText ("MidiComponent", getLocalBounds(),
-                juce::Justification::centred, true);   // draw some placeholder text
 }
 
 void MidiComponent::resized()
 {
     auto margin = 10;
+    midiInputLabel.setBounds(margin, margin,
+        (getWidth() / 2) - (2 * margin), 24);
+    midiOutputLabel.setBounds((getWidth() / 2) + margin, margin,
+        (getWidth() / 2) - (2 * margin), 24);
     midiInputSelector->setBounds(margin, (2 * margin) + 24,
         (getWidth() / 2) - (2 * margin),
         (getHeight() / 2) - ((4 * margin) + 24 + 24));
     midiOutputSelector->setBounds((getWidth() / 2) + margin, (2 * margin) + 24,
         (getWidth() / 2) - (2 * margin),
         (getHeight() / 2) - ((4 * margin) + 24 + 24));
+    refreshButton.setBounds(margin, (getHeight() / 2) - (margin + 24),
+        getWidth() - (2 * margin), 24);
 
 }
 
@@ -79,6 +96,7 @@ void MidiComponent::openDevice(bool isInput, int index)
         {
             DBG("MidiDemo::openDevice: open output device for index = " << index << " failed!");
         }
+        sendToOutputs(launchPadCommand.setProgrammerMode);
     }
 }
 
@@ -86,11 +104,15 @@ void MidiComponent::closeDevice(bool isInput, int index)
 {
     if (isInput)
     {
-        midiInputs[index]->inDevice->stop();
+        if (midiInputs[index]->inDevice.get() != nullptr) 
+        {
+            midiInputs[index]->inDevice->stop();
+        }
         midiInputs[index]->inDevice.reset();
     }
     else
     {
+        sendToOutputs(launchPadCommand.setLiveMode);
         midiOutputs[index]->outDevice.reset();
     }
 }
@@ -112,8 +134,15 @@ juce::ReferenceCountedObjectPtr<MidiDeviceListEntry> MidiComponent::getMidiDevic
 
 void MidiComponent::handleIncomingMidiMessage(juce::MidiInput* /*source*/, const juce::MidiMessage& message)
 {
-    bool noteStatus = message.isNoteOn();
-    DBG(std::to_string(noteStatus));
+    if (message.isNoteOn()) {
+        DBG("NoteNumber: " + std::to_string(message.getNoteNumber()) );
+    }
+    else if (message.isSysEx()) {
+        DBG("SysEX:");
+    }
+    else if (message.isController()) {
+        DBG("Control Change: " + std::to_string(message.getControllerNumber()) );
+    }
 }
 
 void MidiComponent::sendToOutputs(const juce::MidiMessage& msg)
@@ -170,6 +199,20 @@ void MidiComponent::closeUnpluggedDevices(const juce::Array<juce::MidiDeviceInfo
     }
 }
 
+void MidiComponent::selectMidiControllerByName(const juce::String& name) {
+    auto inputDevices = juce::MidiInput::getAvailableDevices();
+    auto outputDevices = juce::MidiOutput::getAvailableDevices();
+    for (auto& inputDevice : inputDevices)
+    {
+        if (inputDevice.name.containsIgnoreCase(name))
+        {
+            MidiDeviceListEntry::Ptr entry = findDevice(inputDevice, true);
+            midiInputSelector->selectRow(2); //todo: finish this crap
+        }
+    }
+
+}
+
 void MidiComponent::updateDeviceList(bool isInputDeviceList)
 {
     auto availableDevices = isInputDeviceList ? juce::MidiInput::getAvailableDevices()
@@ -184,7 +227,6 @@ void MidiComponent::updateDeviceList(bool isInputDeviceList)
         closeUnpluggedDevices(availableDevices, isInputDeviceList);
 
         juce::ReferenceCountedArray<MidiDeviceListEntry> newDeviceList;
-
         // add all currently plugged-in devices to the device list
         for (auto& newDevice : availableDevices)
         {
@@ -213,7 +255,7 @@ MidiComponent::MidiDeviceListBox::MidiDeviceListBox(const juce::String& name, Mi
     isInput(isInputDeviceList)
 {
     setOutlineThickness(1);
-    setMultipleSelectionEnabled(true);
+    setMultipleSelectionEnabled(false);
     setClickingTogglesRowSelection(true);
 }
 

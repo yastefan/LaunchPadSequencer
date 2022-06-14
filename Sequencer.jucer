@@ -11,6 +11,8 @@
       <FILE id="ghTQoI" name="MidiComponent.h" compile="0" resource="0" file="Source/MidiComponent.h"/>
       <FILE id="ARIY8f" name="MidiComponent.cpp" compile="1" resource="0"
             file="Source/MidiComponent.cpp"/>
+      <FILE id="lmoXG7" name="Sequencer.h" compile="0" resource="0" file="Source/Sequencer.h"/>
+      <FILE id="C6RZDe" name="Sequencer.cpp" compile="1" resource="0" file="Source/Sequencer.cpp"/>
     </GROUP>
   </MAINGROUP>
   <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1"/>
