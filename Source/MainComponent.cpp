@@ -3,7 +3,7 @@
 //==============================================================================
 MainComponent::MainComponent()
 {
-    setSize(732, 520);
+    setSize(732, 400);
     addAndMakeVisible(launchPad);
 }
 
@@ -22,9 +22,3 @@ void MainComponent::resized()
 {
     launchPad.setBounds(getLocalBounds());
 }
-
-void MainComponent::timerCallback()
-{
-
-}
-

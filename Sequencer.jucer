@@ -13,6 +13,8 @@
             file="Source/MidiComponent.cpp"/>
       <FILE id="lmoXG7" name="Sequencer.h" compile="0" resource="0" file="Source/Sequencer.h"/>
       <FILE id="C6RZDe" name="Sequencer.cpp" compile="1" resource="0" file="Source/Sequencer.cpp"/>
+      <FILE id="MAoWOL" name="LaunchPadX.cpp" compile="1" resource="0" file="Source/LaunchPadX.cpp"/>
+      <FILE id="nGfC9k" name="LaunchPadX.h" compile="0" resource="0" file="Source/LaunchPadX.h"/>
     </GROUP>
   </MAINGROUP>
   <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1"/>
