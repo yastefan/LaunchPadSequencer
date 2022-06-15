@@ -14,38 +14,47 @@
 //==============================================================================
 Sequencer::Sequencer()
 {
-    // In your constructor, you should add any child components, and
-    // initialise any special settings that your component needs.
-
 }
 
 Sequencer::~Sequencer()
 {
 }
 
-void Sequencer::paint (juce::Graphics& g)
+//==============================================================================
+
+LaunchPad::LaunchPad() :
+    midi(new MidiComponent(this))
 {
-    /* This demo code just fills the component's background and
-       draws some placeholder text to get you started.
+    addAndMakeVisible(*midi);
+    midi->sendToOutputs(launchPadCommand.setProgrammerMode);
 
-       You should replace everything in this method with your own
-       drawing code..
-    */
-
-    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));   // clear the background
-
-    g.setColour (juce::Colours::grey);
-    g.drawRect (getLocalBounds(), 1);   // draw an outline around the component
-
-    g.setColour (juce::Colours::white);
-    g.setFont (14.0f);
-    g.drawText ("Sequencer", getLocalBounds(),
-                juce::Justification::centred, true);   // draw some placeholder text
+    setSize(732, 520);
 }
 
-void Sequencer::resized()
+LaunchPad::~LaunchPad()
 {
-    // This method is where you should set the bounds of any child
-    // components that your component contains..
+    midi->sendToOutputs(launchPadCommand.setLiveMode);
+}
 
+void LaunchPad::handleIncomingMidiMessage(juce::MidiInput* /*source*/, const juce::MidiMessage& message)
+{
+    if (message.isNoteOn()) {
+        DBG("NoteNumber: " + std::to_string(message.getNoteNumber()));
+    }
+    else if (message.isSysEx()) {
+        DBG("SysEX:");
+    }
+    else if (message.isController()) {
+        DBG("Control Change: " + std::to_string(message.getControllerNumber()));
+    }
+}
+
+void LaunchPad::paint(juce::Graphics& g)
+{
+
+}
+
+void LaunchPad::resized()
+{
+    midi->setBounds(getLocalBounds());
 }

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include "MidiComponent.h"
+#include "Sequencer.h"
 
 //==============================================================================
 /*
@@ -24,6 +24,6 @@ private:
     //==============================================================================    
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
     void timerCallback() override;
-
-    MidiComponent midiComponent;
+    
+    LaunchPad launchPad;
 };

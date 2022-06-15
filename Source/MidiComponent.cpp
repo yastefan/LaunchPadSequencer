@@ -12,10 +12,11 @@
 #include "MidiComponent.h"
 
 //==============================================================================
-MidiComponent::MidiComponent() :
+MidiComponent::MidiComponent(juce::MidiInputCallback* callback) :
     midiInputSelector(new MidiDeviceListBox("Midi Input Selector", *this, true)),
     midiOutputSelector(new MidiDeviceListBox("Midi Output Selector", *this, false))
 {
+    midiCallback = callback;
     updateDeviceList(true);
     updateDeviceList(false);
 
@@ -27,7 +28,6 @@ MidiComponent::MidiComponent() :
 
     refreshButton.onClick = [this]
     {
-        sendToOutputs(launchPadCommand.setProgrammerMode);
         updateDeviceList(true);
         updateDeviceList(false);
     };
@@ -37,7 +37,6 @@ MidiComponent::MidiComponent() :
 
 MidiComponent::~MidiComponent()
 {
-    sendToOutputs(launchPadCommand.setLiveMode);
     midiInputs.clear();
     midiOutputs.clear();
 
@@ -78,7 +77,7 @@ void MidiComponent::openDevice(bool isInput, int index)
 {
     if (isInput)
     {
-        midiInputs[index]->inDevice = juce::MidiInput::openDevice(midiInputs[index]->deviceInfo.identifier, this);
+        midiInputs[index]->inDevice = juce::MidiInput::openDevice(midiInputs[index]->deviceInfo.identifier, midiCallback);
 
         if (midiInputs[index]->inDevice.get() == nullptr)
         {
@@ -96,7 +95,6 @@ void MidiComponent::openDevice(bool isInput, int index)
         {
             DBG("MidiDemo::openDevice: open output device for index = " << index << " failed!");
         }
-        sendToOutputs(launchPadCommand.setProgrammerMode);
     }
 }
 
@@ -112,7 +110,6 @@ void MidiComponent::closeDevice(bool isInput, int index)
     }
     else
     {
-        sendToOutputs(launchPadCommand.setLiveMode);
         midiOutputs[index]->outDevice.reset();
     }
 }
@@ -130,19 +127,6 @@ int MidiComponent::getNumMidiOutputs() const noexcept
 juce::ReferenceCountedObjectPtr<MidiDeviceListEntry> MidiComponent::getMidiDevice(int index, bool isInput) const noexcept
 {
     return isInput ? midiInputs[index] : midiOutputs[index];
-}
-
-void MidiComponent::handleIncomingMidiMessage(juce::MidiInput* /*source*/, const juce::MidiMessage& message)
-{
-    if (message.isNoteOn()) {
-        DBG("NoteNumber: " + std::to_string(message.getNoteNumber()) );
-    }
-    else if (message.isSysEx()) {
-        DBG("SysEX:");
-    }
-    else if (message.isController()) {
-        DBG("Control Change: " + std::to_string(message.getControllerNumber()) );
-    }
 }
 
 void MidiComponent::sendToOutputs(const juce::MidiMessage& msg)
@@ -197,20 +181,6 @@ void MidiComponent::closeUnpluggedDevices(const juce::Array<juce::MidiDeviceInfo
             midiDevices.remove(i);
         }
     }
-}
-
-void MidiComponent::selectMidiControllerByName(const juce::String& name) {
-    auto inputDevices = juce::MidiInput::getAvailableDevices();
-    auto outputDevices = juce::MidiOutput::getAvailableDevices();
-    for (auto& inputDevice : inputDevices)
-    {
-        if (inputDevice.name.containsIgnoreCase(name))
-        {
-            MidiDeviceListEntry::Ptr entry = findDevice(inputDevice, true);
-            midiInputSelector->selectRow(2); //todo: finish this crap
-        }
-    }
-
 }
 
 void MidiComponent::updateDeviceList(bool isInputDeviceList)

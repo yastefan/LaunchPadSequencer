@@ -4,7 +4,7 @@
 MainComponent::MainComponent()
 {
     setSize(732, 520);
-    addAndMakeVisible(midiComponent);
+    addAndMakeVisible(launchPad);
 }
 
 MainComponent::~MainComponent()
@@ -20,7 +20,7 @@ void MainComponent::paint (juce::Graphics& g)
 
 void MainComponent::resized()
 {
-    midiComponent.setBounds(getLocalBounds());
+    launchPad.setBounds(getLocalBounds());
 }
 
 void MainComponent::timerCallback()
