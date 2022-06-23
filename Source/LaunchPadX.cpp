@@ -15,8 +15,13 @@ LaunchPad::LaunchPad() :
 {
     addAndMakeVisible(*midi);
     addAndMakeVisible(startButton);
+    addAndMakeVisible(func1Button);
+    addAndMakeVisible(func2Button);
 
+    startTimer(0, (60 * 1000) / 120);
     startButton.onClick = [this]{ setToProgrammerMode(); };
+    func1Button.onClick = [this]{ func1(); };
+    func2Button.onClick = [this]{ func2(); };
     setSize(732, 520);
 }
 
@@ -27,23 +32,85 @@ LaunchPad::~LaunchPad()
 
 void LaunchPad::handleIncomingMidiMessage(juce::MidiInput* /*source*/, const juce::MidiMessage& message)
 {
-    if (message.isNoteOn()) {
-        DBG("NoteNumber: " + std::to_string(message.getNoteNumber()));
+    if (message.isNoteOn()) 
+    {
+        int noteNumber = message.getNoteNumber();
+        switch(noteNumber)
+        {
+        case LaunchKeys::ResyncKey:
+                resetTimer();
+                break;
+            case LaunchKeys::TapKey:
+                updateBpm(68.0);
+                break;
+        }
+        DBG("NoteNumber: " + std::to_string(noteNumber));
     }
     else if (message.isSysEx()) {
         DBG("SysEX:");
     }
     else if (message.isController()) {
-        DBG("Control Change: " + std::to_string(message.getControllerNumber()));
+        DBG("Control Change: " + std::to_string(message.getControllerNumber()) + "  ->  " + std::to_string(message.getControllerValue()));
+    }
+}
+
+void LaunchPad::timerCallback(int id) {
+   
+    if (id == TimerNr::Sequencer)
+    {
+        setLed(sequencerPads[currentStep], Color::Off);
+        if (currentStep < sequencerSteps - 1)
+            currentStep++;
+        else
+            currentStep = 0;
+        setLed(sequencerPads[currentStep], Color::Red);
+    }
+    else if (id == TimerNr::Tap)
+    {
+
+    }
+};
+
+void LaunchPad::resetTimer()
+{
+    stopTimer(0);
+    setLed(sequencerPads[currentStep], Color::Off);
+    setLed(sequencerPads[0], Color::Red);
+    currentStep = 0;
+    startTimer(0, (60 * 1000) / 120);
+}
+
+void LaunchPad::updateBpm(float bpm)
+{
+    long int bpmCurrentTime = juce::Time::currentTimeMillis();
+    long int timeDiff = bpmCurrentTime - bpmLastTime;
+
+    if (timeDiff < ((60 * 1000) / 50) && timeDiff > ((60 * 1000) / 240)) // time intervall is between 50 and 240 bpm
+    {
+        startTimer(TimerNr::Sequencer, timeDiff);
+        bpmLastTime = bpmCurrentTime;
+    }
+    else 
+    {
+        bpmLastTime = bpmCurrentTime;
     }
 }
 //==============================================================================
+void LaunchPad::func1()
+{
+    unsigned char k[10] = {11, 12, 15, 17, 23, 45, 67, 91, 74, 75};
+    setLed(k, 10, Color::White, LightMode::Pulse);
+}
+
+void LaunchPad::func2()
+{
+    unsigned char k[10] = { 11, 12, 15, 17, 23, 45, 67, 91, 74, 75 };
+    setLed(k, 10, Color::Off, LightMode::Pulse);
+}
+
 void LaunchPad::setToProgrammerMode()
 {
     midi->sendToOutputs(createSysExMessage("\x00\x20\x29\x02\x0c\x0e\x01", 7));
-    //setLed(75, Color::Red);
-    unsigned char k[10] = {11, 12, 15, 17, 23, 45, 67, 91, 74, 75};
-    setLed(k, 10, Color::White, LightMode::Pulse);
 }
 
 void LaunchPad::setToLiveMode()
@@ -79,6 +146,7 @@ void LaunchPad::resized()
 {
     auto margin = 10;
     midi->setBounds(getLocalBounds());
-    startButton.setBounds(margin, (getHeight() / 2),
-        getWidth() - (2 * margin), 24);
+    startButton.setBounds(margin, (getHeight() / 2), getWidth() - (2 * margin), 24);
+    func1Button.setBounds(margin, (getHeight() - 100), getWidth() - (2 * margin), 24);
+    func2Button.setBounds(margin, (getHeight() - 60), getWidth() - (2 * margin), 24);
 }

@@ -24,10 +24,20 @@ enum LightMode
 {
     Static = 0, Pulse = 2
 };
+enum TimerNr
+{
+    Sequencer = 0, Tap = 1
+};
+enum LaunchKeys
+{
+    ResyncKey = 17,
+    TapKey = 18
+};
 
 class LaunchPad : public juce::Component,
                   private juce::MidiInputCallback,
-                  private juce::MidiMessage
+                  private juce::MidiMessage,
+                  private juce::MultiTimer
 {
 public:
     LaunchPad();
@@ -41,14 +51,24 @@ public:
     void setLed(unsigned char led, Color color, LightMode mode = LightMode::Static);
     void setLed(unsigned char* leds, unsigned char length, Color color, LightMode mode);
 
+    void func1();
+    void func2();
+
 private:
     int sequencerPads[8] = { 81, 82, 83, 84, 85, 86, 87, 88 };
-    int sequencerLeds[8] = { 80, 81, 82, 83, 84, 85, 86, 87 };
-
+    int sequencerSteps = 8;
+    int currentStep = 0;
+    long int bpmLastTime = 0;
     std::unique_ptr<MidiComponent> midi;
 
     juce::TextButton startButton{ "Start" };
+    juce::TextButton func1Button{ "Funktion 1" };
+    juce::TextButton func2Button{ "Funktion 2" };
 
+    void timerCallback(int id) final;
     void handleIncomingMidiMessage(juce::MidiInput*, const juce::MidiMessage&) override;
+
+    void resetTimer();
+    void updateBpm(float bpm);
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(LaunchPad)
 };

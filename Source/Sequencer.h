@@ -16,11 +16,13 @@
 //==============================================================================
 
 
-class Sequencer
+class Sequencer : private juce::Timer
 {
 public:
     Sequencer();
     ~Sequencer();
+
 private:
-   
+    std::function<void(int)> callbackFunction;
+    void timerCallback() final;
 };
