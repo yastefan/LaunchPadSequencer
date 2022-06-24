@@ -33,6 +33,12 @@ enum LaunchKeys
     ResyncKey = 17,
     TapKey = 18
 };
+struct TapStatus
+{
+    int currentBpmTime = (60 * 1000) / 128;
+    long int timeOfLastTap = 0;
+    bool active = false;
+};
 
 class LaunchPad : public juce::Component,
                   private juce::MidiInputCallback,
@@ -58,7 +64,7 @@ private:
     int sequencerPads[8] = { 81, 82, 83, 84, 85, 86, 87, 88 };
     int sequencerSteps = 8;
     int currentStep = 0;
-    long int bpmLastTime = 0;
+    TapStatus tapStatus;
     std::unique_ptr<MidiComponent> midi;
 
     juce::TextButton startButton{ "Start" };
@@ -69,6 +75,6 @@ private:
     void handleIncomingMidiMessage(juce::MidiInput*, const juce::MidiMessage&) override;
 
     void resetTimer();
-    void updateBpm(float bpm);
+    void updateBpm();
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(LaunchPad)
 };

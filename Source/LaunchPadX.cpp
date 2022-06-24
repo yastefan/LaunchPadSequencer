@@ -41,7 +41,7 @@ void LaunchPad::handleIncomingMidiMessage(juce::MidiInput* /*source*/, const juc
                 resetTimer();
                 break;
             case LaunchKeys::TapKey:
-                updateBpm(68.0);
+                updateBpm();
                 break;
         }
         DBG("NoteNumber: " + std::to_string(noteNumber));
@@ -77,22 +77,31 @@ void LaunchPad::resetTimer()
     setLed(sequencerPads[currentStep], Color::Off);
     setLed(sequencerPads[0], Color::Red);
     currentStep = 0;
-    startTimer(0, (60 * 1000) / 120);
+    startTimer(0, tapStatus.currentBpmTime);
 }
 
-void LaunchPad::updateBpm(float bpm)
+void LaunchPad::updateBpm()
 {
-    long int bpmCurrentTime = juce::Time::currentTimeMillis();
-    long int timeDiff = bpmCurrentTime - bpmLastTime;
+    long int currentTime = juce::Time::currentTimeMillis();
+    long int timeSinceLastTap = currentTime - tapStatus.timeOfLastTap;
 
-    if (timeDiff < ((60 * 1000) / 50) && timeDiff > ((60 * 1000) / 240)) // time intervall is between 50 and 240 bpm
+    if (timeSinceLastTap < ((60 * 1000) / 50) && timeSinceLastTap > ((60 * 1000) / 240)) // time intervall is between 50 and 240 bpm
     {
-        startTimer(TimerNr::Sequencer, timeDiff);
-        bpmLastTime = bpmCurrentTime;
+        if (tapStatus.active) {
+            tapStatus.currentBpmTime = (tapStatus.currentBpmTime + timeSinceLastTap) / 2;
+        }
+        else 
+        {
+            tapStatus.currentBpmTime = timeSinceLastTap;
+            tapStatus.active = true;
+        }
+        startTimer(TimerNr::Sequencer, tapStatus.currentBpmTime);
+        tapStatus.timeOfLastTap = currentTime;
     }
     else 
     {
-        bpmLastTime = bpmCurrentTime;
+        tapStatus.timeOfLastTap = currentTime;
+        tapStatus.active = false;
     }
 }
 //==============================================================================
