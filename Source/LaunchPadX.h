@@ -37,7 +37,21 @@ struct TapStatus
 {
     int currentBpmTime = (60 * 1000) / 128;
     long int timeOfLastTap = 0;
-    bool active = false;
+    int tapCount = 0;
+};
+
+class StepManager
+{
+private:
+
+public:
+    int activePage = 0;
+    int activeStep = 0;
+    int statusStorage[4][8][80];    //Page, Step, LED
+
+    void changePage(int page);
+    void changeStep(int step);
+    void toggleLed(int led, int value = 1);
 };
 
 class LaunchPad : public juce::Component,
@@ -55,7 +69,8 @@ public:
     void setToProgrammerMode();
     void setToLiveMode();
     void setLed(unsigned char led, Color color, LightMode mode = LightMode::Static);
-    void setLed(unsigned char* leds, unsigned char length, Color color, LightMode mode);
+    void setLeds(unsigned char* leds, unsigned char length, Color color, LightMode mode);
+    void loadStep(int step);
 
     void func1();
     void func2();
@@ -65,6 +80,7 @@ private:
     int sequencerSteps = 8;
     int currentStep = 0;
     TapStatus tapStatus;
+    StepManager stepManager;
     std::unique_ptr<MidiComponent> midi;
 
     juce::TextButton startButton{ "Start" };
