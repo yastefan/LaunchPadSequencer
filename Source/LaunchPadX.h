@@ -24,10 +24,6 @@ enum LightMode
 {
     Static = 0, Pulse = 2
 };
-enum TimerNr
-{
-    Sequencer = 0, Tap = 1
-};
 enum LaunchKeys
 {
     ResyncKey = 17,
@@ -47,17 +43,17 @@ private:
 public:
     int activePage = 0;
     int activeStep = 0;
-    int statusStorage[4][8][80];    //Page, Step, LED
+    int statusStorage[4][8][80] = {};    //Page, Step, LED
 
     void changePage(int page);
     void changeStep(int step);
-    void toggleLed(int led, int value = 1);
+    int toggleLed(int led, int value = 1);
 };
 
 class LaunchPad : public juce::Component,
                   private juce::MidiInputCallback,
                   private juce::MidiMessage,
-                  private juce::MultiTimer
+                  private juce::Timer
 {
 public:
     LaunchPad();
@@ -71,23 +67,20 @@ public:
     void setLed(unsigned char led, Color color, LightMode mode = LightMode::Static);
     void setLeds(unsigned char* leds, unsigned char length, Color color, LightMode mode);
     void loadStep(int step);
-
-    void func1();
-    void func2();
+    void sendOscMessages();
 
 private:
     int sequencerPads[8] = { 81, 82, 83, 84, 85, 86, 87, 88 };
     int sequencerSteps = 8;
     int currentStep = 0;
+    juce::OSCSender oscSender;
     TapStatus tapStatus;
     StepManager stepManager;
     std::unique_ptr<MidiComponent> midi;
 
     juce::TextButton startButton{ "Start" };
-    juce::TextButton func1Button{ "Funktion 1" };
-    juce::TextButton func2Button{ "Funktion 2" };
 
-    void timerCallback(int id) final;
+    void timerCallback() final;
     void handleIncomingMidiMessage(juce::MidiInput*, const juce::MidiMessage&) override;
 
     void resetTimer();

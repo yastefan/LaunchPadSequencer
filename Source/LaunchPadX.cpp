@@ -15,18 +15,17 @@ LaunchPad::LaunchPad() :
 {
     addAndMakeVisible(*midi);
     addAndMakeVisible(startButton);
-    addAndMakeVisible(func1Button);
-    addAndMakeVisible(func2Button);
 
-    startTimer(0, (60 * 1000) / 120);
+    oscSender.connect("127.0.0.1", 9005);
+
+    startTimer((60 * 1000) / 120);
     startButton.onClick = [this]{ setToProgrammerMode(); };
-    func1Button.onClick = [this]{ func1(); };
-    func2Button.onClick = [this]{ func2(); };
     setSize(732, 520);
 }
 
 LaunchPad::~LaunchPad()
 {
+    oscSender.disconnect();
     setToLiveMode();
 }
 
@@ -40,7 +39,7 @@ void StepManager::changeStep(int step)
     if (step >= 0 && step < 8)
         activeStep = step;
 }
-void StepManager::toggleLed(int led, int value)
+int StepManager::toggleLed(int led, int value)
 {
     if (led < 80)
     {
@@ -48,6 +47,7 @@ void StepManager::toggleLed(int led, int value)
             statusStorage[activePage][activeStep][led] = 0;
         else
             statusStorage[activePage][activeStep][led] = value;
+        return statusStorage[activePage][activeStep][led];
     }
 }
  
@@ -72,46 +72,97 @@ void LaunchPad::handleIncomingMidiMessage(juce::MidiInput* /*source*/, const juc
         else if (noteNumber > 30 && noteNumber < 79)
         {
             DBG("Exec: NoteNumber: " + std::to_string(noteNumber));
-            stepManager.toggleLed(noteNumber);
-            setLed(noteNumber, Color::Red);
+            if ( stepManager.toggleLed(noteNumber) )
+                setLed(noteNumber, Color::Red);
+            else
+                setLed(noteNumber, Color::Off);
         }
     }
-    else if (message.isSysEx()) {
-        DBG("SysEX:");
-    }
+
     else if (message.isController()) {
         DBG("Control Change: " + std::to_string(message.getControllerNumber()) + "  ->  " + std::to_string(message.getControllerValue()));
+        if (message.getControllerValue() > 0)
+        {
+            switch (message.getControllerNumber())
+            {
+            case 89:
+                stepManager.changePage(0);
+                setLed(89, Color::Red);
+                setLed(79, Color::Off);
+                setLed(69, Color::Off);
+                setLed(59, Color::Off);
+                break;
+            case 79:
+                stepManager.changePage(1);
+                setLed(89, Color::Off);
+                setLed(79, Color::Red);
+                setLed(69, Color::Off);
+                setLed(59, Color::Off);
+                break;
+            case 69:
+                stepManager.changePage(2);
+                setLed(89, Color::Off);
+                setLed(79, Color::Off);
+                setLed(69, Color::Red);
+                setLed(59, Color::Off);
+                break;
+            case 59:
+                stepManager.changePage(3);
+                setLed(89, Color::Off);
+                setLed(79, Color::Off);
+                setLed(69, Color::Off);
+                setLed(59, Color::Red);
+                break;
+            default:
+                break;
+            }
+            loadStep(stepManager.activeStep);
+        }
     }
 }
 
-void LaunchPad::timerCallback(int id) {
-   
-    if (id == TimerNr::Sequencer)
-    {
-        if (currentStep != stepManager.activeStep)
-            setLed(sequencerPads[currentStep], Color::Off);
-        else
-            setLed(sequencerPads[currentStep], Color::White);
-        
-        if (currentStep < sequencerSteps - 1)
-            currentStep++;
-        else
-            currentStep = 0;
-        setLed(sequencerPads[currentStep], Color::Red);
-    }
-    else if (id == TimerNr::Tap)
-    {
+void LaunchPad::sendOscMessages() {
+    
+    int precursor = (currentStep > 0) ? currentStep - 1 : 7;
 
+    for (int i = 0; i < 80; i++)
+    {
+        if (stepManager.statusStorage[stepManager.activePage][currentStep][i] > stepManager.statusStorage[stepManager.activePage][precursor][i])
+        {
+            std::string message = "/sequencer/" + std::to_string(i);
+            oscSender.send(message.c_str(), 1);
+        }
+        else if (stepManager.statusStorage[stepManager.activePage][currentStep][i] < stepManager.statusStorage[stepManager.activePage][precursor][i])
+        {
+            std::string message = "/sequencer/" + std::to_string(i);
+            oscSender.send(message.c_str(), 0);
+        }
     }
+}
+
+void LaunchPad::timerCallback() {
+   
+    if (currentStep != stepManager.activeStep)
+        setLed(sequencerPads[currentStep], Color::Off);
+    else
+        setLed(sequencerPads[currentStep], Color::White);
+    
+    if (currentStep < sequencerSteps - 1)
+        currentStep++;
+    else
+        currentStep = 0;
+    setLed(sequencerPads[currentStep], Color::Red);
+    oscSender.send("/sequencer/Beat", currentStep);
+    sendOscMessages();
 };
 
 void LaunchPad::resetTimer()
 {
-    stopTimer(0);
+    stopTimer();
     setLed(sequencerPads[currentStep], Color::Off);
     setLed(sequencerPads[0], Color::Red);
     currentStep = 0;
-    startTimer(0, tapStatus.currentBpmTime);
+    startTimer(tapStatus.currentBpmTime);
 }
 
 void LaunchPad::updateBpm()
@@ -129,7 +180,7 @@ void LaunchPad::updateBpm()
             tapStatus.currentBpmTime = timeSinceLastTap;
             tapStatus.tapCount = 1;
         }
-        startTimer(TimerNr::Sequencer, tapStatus.currentBpmTime);
+        startTimer(tapStatus.currentBpmTime);
         tapStatus.timeOfLastTap = currentTime;
         DBG(60000 / tapStatus.currentBpmTime);
     }
@@ -140,18 +191,6 @@ void LaunchPad::updateBpm()
     }
 }
 //==============================================================================
-void LaunchPad::func1()
-{
-    stepManager.statusStorage[stepManager.activePage][1][15] = 1;
-    stepManager.statusStorage[stepManager.activePage][1][14] = 1;
-    stepManager.statusStorage[stepManager.activePage][1][13] = 1;
-}
-
-void LaunchPad::func2()
-{
-    unsigned char k[10] = { 11, 12, 15, 17, 23, 45, 67, 91, 74, 75 };
-    setLeds(k, 10, Color::Off, LightMode::Pulse);
-}
 
 void LaunchPad::setToProgrammerMode()
 {
@@ -173,18 +212,21 @@ void LaunchPad::loadStep(int step)
     unsigned char ledsOff[80] = {};
     int ledsOnCount = 0;
     int ledsOffCount = 0;
+    int index = 0;
 
-    for (int i = 0; i < 80; i++)
-    {
-        if (stepManager.statusStorage[stepManager.activePage][step][i] > 0)
-        {
-            ledsOn[ledsOnCount] = i;
-            ledsOnCount++;
-        }
-        else
-        {
-            ledsOff[ledsOffCount] = i;
-            ledsOffCount++;
+    for (int row = 3; row < 8; row++) {
+        for (int column = 1; column < 9; column++) {
+            index = row * 10 + column;
+            if (stepManager.statusStorage[stepManager.activePage][step][index] > 0)
+            {
+                ledsOn[ledsOnCount] = index;
+                ledsOnCount++;
+            }
+            else
+            {
+                ledsOff[ledsOffCount] = index;
+                ledsOffCount++;
+            }
         }
     }
     setLeds(ledsOn, ledsOnCount, Color::Red, LightMode::Static);
@@ -216,6 +258,4 @@ void LaunchPad::resized()
     auto margin = 10;
     midi->setBounds(getLocalBounds());
     startButton.setBounds(margin, (getHeight() / 2), getWidth() - (2 * margin), 24);
-    func1Button.setBounds(margin, (getHeight() - 100), getWidth() - (2 * margin), 24);
-    func2Button.setBounds(margin, (getHeight() - 60), getWidth() - (2 * margin), 24);
 }
