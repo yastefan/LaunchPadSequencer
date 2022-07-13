@@ -18,7 +18,7 @@
 */
 enum Color
 {
-    Off = 0, White = 3, Red = 5
+    Off = 0, White = 3, Red = 5, LightGreen = 24, LightPurple = 48, 
 };
 enum LightMode
 {
@@ -68,7 +68,9 @@ public:
     void setLeds(unsigned char* leds, unsigned char length, Color color, LightMode mode);
     void loadStep(int step);
     void sendOscMessages();
-
+    void sendOscSequencesMessage(int sequenceNumber, int value);
+    int LaunchPad::MidiNumberToSequenceNumber(int midiNumber);
+    void offAllSequences();
 private:
     int sequencerPads[8] = { 81, 82, 83, 84, 85, 86, 87, 88 };
     int sequencerSteps = 8;

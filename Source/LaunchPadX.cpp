@@ -87,6 +87,7 @@ void LaunchPad::handleIncomingMidiMessage(juce::MidiInput* /*source*/, const juc
             {
             case 89:
                 stepManager.changePage(0);
+                offAllSequences();
                 setLed(89, Color::Red);
                 setLed(79, Color::Off);
                 setLed(69, Color::Off);
@@ -94,6 +95,7 @@ void LaunchPad::handleIncomingMidiMessage(juce::MidiInput* /*source*/, const juc
                 break;
             case 79:
                 stepManager.changePage(1);
+                offAllSequences();
                 setLed(89, Color::Off);
                 setLed(79, Color::Red);
                 setLed(69, Color::Off);
@@ -101,6 +103,7 @@ void LaunchPad::handleIncomingMidiMessage(juce::MidiInput* /*source*/, const juc
                 break;
             case 69:
                 stepManager.changePage(2);
+                offAllSequences();
                 setLed(89, Color::Off);
                 setLed(79, Color::Off);
                 setLed(69, Color::Red);
@@ -108,6 +111,7 @@ void LaunchPad::handleIncomingMidiMessage(juce::MidiInput* /*source*/, const juc
                 break;
             case 59:
                 stepManager.changePage(3);
+                offAllSequences();
                 setLed(89, Color::Off);
                 setLed(79, Color::Off);
                 setLed(69, Color::Off);
@@ -127,23 +131,57 @@ void LaunchPad::sendOscMessages() {
 
     for (int i = 0; i < 80; i++)
     {
+        int sequenceNumber = MidiNumberToSequenceNumber(i) + 208;
         if (stepManager.statusStorage[stepManager.activePage][currentStep][i] > stepManager.statusStorage[stepManager.activePage][precursor][i])
         {
-            std::string message = "/sequencer/" + std::to_string(i);
-            oscSender.send(message.c_str(), 1);
+            sendOscSequencesMessage(sequenceNumber, 1);
         }
         else if (stepManager.statusStorage[stepManager.activePage][currentStep][i] < stepManager.statusStorage[stepManager.activePage][precursor][i])
         {
-            std::string message = "/sequencer/" + std::to_string(i);
-            oscSender.send(message.c_str(), 0);
+            sendOscSequencesMessage(sequenceNumber, 0);
         }
     }
+}
+
+void LaunchPad::offAllSequences()
+{
+    for (int i = 0; i < 80; i++)
+    {
+        sendOscSequencesMessage(MidiNumberToSequenceNumber(i)+208, 0);
+    }
+}
+
+
+void LaunchPad::sendOscSequencesMessage(int sequenceNumber, int value) {
+    std::string message_address = "/13.13.1.5." + std::to_string(sequenceNumber);
+    juce::OSCArgument button("Flash");
+    oscSender.send(message_address.c_str(), button, value);
+}
+
+int LaunchPad::MidiNumberToSequenceNumber(int midiNumber) {
+    if (midiNumber < 79 && midiNumber > 70)
+        return midiNumber - 71;
+    else if (midiNumber < 69 && midiNumber > 60)
+        return midiNumber - 53;
+    else if (midiNumber < 59 && midiNumber > 50)
+        return midiNumber - 35;
+    else if (midiNumber < 49 && midiNumber > 40)
+        return midiNumber - 17;
+    else if (midiNumber < 39 && midiNumber > 30)
+        return midiNumber + 1;
+    else if (midiNumber < 29 && midiNumber > 20)
+        return midiNumber + 19;
+    else if (midiNumber < 19 && midiNumber > 10)
+        return midiNumber + 37;
 }
 
 void LaunchPad::timerCallback() {
    
     if (currentStep != stepManager.activeStep)
-        setLed(sequencerPads[currentStep], Color::Off);
+        if(sequencerPads[currentStep] < 85)
+            setLed(sequencerPads[currentStep], Color::LightGreen);
+        else
+            setLed(sequencerPads[currentStep], Color::LightPurple);
     else
         setLed(sequencerPads[currentStep], Color::White);
     
@@ -195,6 +233,7 @@ void LaunchPad::updateBpm()
 void LaunchPad::setToProgrammerMode()
 {
     midi->sendToOutputs(createSysExMessage("\x00\x20\x29\x02\x0c\x0e\x01", 7));
+    setLed(89, Color::Red);
 }
 
 void LaunchPad::setToLiveMode()
