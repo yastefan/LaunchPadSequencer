@@ -15,11 +15,19 @@ LaunchPad::LaunchPad() :
 {
     addAndMakeVisible(*midi);
     addAndMakeVisible(startButton);
+    addAndMakeVisible(offsetSelector);
+
+    offsetSelector.setInputRestrictions(4, "0123456789");
+    offsetSelector.setName("Sequence Offset");
+    offsetSelector.setText("200");
+
+    offsetSelector.onTextChange = [this] {changeSequenceOffset(); };
+    startButton.onClick = [this] { setToProgrammerMode(); };
+    
 
     oscSender.connect("127.0.0.1", 9005);
-
     startTimer((60 * 1000) / 120);
-    startButton.onClick = [this]{ setToProgrammerMode(); };
+    
     setSize(732, 520);
 }
 
@@ -64,18 +72,46 @@ void LaunchPad::handleIncomingMidiMessage(juce::MidiInput* /*source*/, const juc
         else if (noteNumber > 80 && noteNumber < 89)
         {
             DBG("Step: NoteNumber: " + std::to_string(noteNumber));
-            setLed(stepManager.activeStep + 81, Color::Off);
+            if (stepManager.activeStep < 4)
+                setLed(stepManager.activeStep + 81, Color::LightBlue);
+            else
+                setLed(stepManager.activeStep + 81, Color::LightPurple);
             setLed(noteNumber, Color::White);
             stepManager.changeStep(noteNumber - 81);
             loadStep(noteNumber - 81);
         }
-        else if (noteNumber > 30 && noteNumber < 79)
+        else if (noteNumber > 50 && noteNumber < 79)
         {
             DBG("Exec: NoteNumber: " + std::to_string(noteNumber));
             if ( stepManager.toggleLed(noteNumber) )
                 setLed(noteNumber, Color::Red);
             else
-                setLed(noteNumber, Color::Off);
+                setLed(noteNumber, Color::LightGreen);
+        }
+        else if ((noteNumber > 24 && noteNumber < 29) || (noteNumber > 34 && noteNumber < 39) || (noteNumber > 44 && noteNumber < 49))
+        {
+            if (stepManager.toggleLed(noteNumber))
+            {
+                setLed(noteNumber, Color::White);
+                sendOscSequencesMessage(MidiNumberToSequenceNumber(noteNumber), 1);
+            }
+            else
+            {
+                setLed(noteNumber, Color::LightYellow);
+                sendOscSequencesMessage(MidiNumberToSequenceNumber(noteNumber), 0);
+            }
+        }
+        else if ((noteNumber > 20 && noteNumber < 25) || (noteNumber > 30 && noteNumber < 35) || (noteNumber > 40 && noteNumber < 45))
+        {
+            sendOscSequencesMessage(MidiNumberToSequenceNumber(noteNumber), 1);
+        }
+    }
+    else if (message.isNoteOff())
+    {
+        int noteNumber = message.getNoteNumber();
+        if ((noteNumber > 20 && noteNumber < 25) || (noteNumber > 30 && noteNumber < 35) || (noteNumber > 40 && noteNumber < 45))
+        {
+            sendOscSequencesMessage(MidiNumberToSequenceNumber(noteNumber), 0);
         }
     }
 
@@ -131,7 +167,7 @@ void LaunchPad::sendOscMessages() {
 
     for (int i = 0; i < 80; i++)
     {
-        int sequenceNumber = MidiNumberToSequenceNumber(i) + 208;
+        int sequenceNumber = MidiNumberToSequenceNumber(i) + sequenceOffset;
         if (stepManager.statusStorage[stepManager.activePage][currentStep][i] > stepManager.statusStorage[stepManager.activePage][precursor][i])
         {
             sendOscSequencesMessage(sequenceNumber, 1);
@@ -147,7 +183,7 @@ void LaunchPad::offAllSequences()
 {
     for (int i = 0; i < 80; i++)
     {
-        sendOscSequencesMessage(MidiNumberToSequenceNumber(i)+208, 0);
+        sendOscSequencesMessage(MidiNumberToSequenceNumber(i)+sequenceOffset, 0);
     }
 }
 
@@ -179,7 +215,7 @@ void LaunchPad::timerCallback() {
    
     if (currentStep != stepManager.activeStep)
         if(sequencerPads[currentStep] < 85)
-            setLed(sequencerPads[currentStep], Color::LightGreen);
+            setLed(sequencerPads[currentStep], Color::LightBlue);
         else
             setLed(sequencerPads[currentStep], Color::LightPurple);
     else
@@ -197,7 +233,10 @@ void LaunchPad::timerCallback() {
 void LaunchPad::resetTimer()
 {
     stopTimer();
-    setLed(sequencerPads[currentStep], Color::Off);
+    if (currentStep < 4)
+        setLed(sequencerPads[currentStep], Color::LightBlue);
+    else
+        setLed(sequencerPads[currentStep], Color::LightPurple);
     setLed(sequencerPads[0], Color::Red);
     currentStep = 0;
     startTimer(tapStatus.currentBpmTime);
@@ -234,11 +273,25 @@ void LaunchPad::setToProgrammerMode()
 {
     midi->sendToOutputs(createSysExMessage("\x00\x20\x29\x02\x0c\x0e\x01", 7));
     setLed(89, Color::Red);
+    loadStep(0);
+
+    setLed(17, Color::LightGreen);
+    setLed(18, Color::LightGreen, LightMode::Pulse);
+
+    unsigned char leftAction[12] = { 21, 22, 23, 24, 31, 32, 33, 34, 41, 42, 43, 44 };
+    unsigned char rightAction[12] = { 25, 26, 27, 28, 35, 36, 37, 38, 45, 46, 47, 48 };
+    setLeds(leftAction, 12, Color::Orange);
+    setLeds(rightAction, 12, Color::LightYellow);
+
 }
 
 void LaunchPad::setToLiveMode()
 {
     midi->sendToOutputs(createSysExMessage("\x00\x20\x29\x02\x0c\x0e\x00", 7));
+}
+void LaunchPad::changeSequenceOffset()
+{
+    sequenceOffset = std::stoi(offsetSelector.getText().toStdString());
 }
 void LaunchPad::setLed(unsigned char led, Color color, LightMode mode) 
 {
@@ -253,7 +306,7 @@ void LaunchPad::loadStep(int step)
     int ledsOffCount = 0;
     int index = 0;
 
-    for (int row = 3; row < 8; row++) {
+    for (int row = 5; row < 8; row++) {
         for (int column = 1; column < 9; column++) {
             index = row * 10 + column;
             if (stepManager.statusStorage[stepManager.activePage][step][index] > 0)
@@ -269,7 +322,7 @@ void LaunchPad::loadStep(int step)
         }
     }
     setLeds(ledsOn, ledsOnCount, Color::Red, LightMode::Static);
-    setLeds(ledsOff, ledsOffCount, Color::Off, LightMode::Static);
+    setLeds(ledsOff, ledsOffCount, Color::LightGreen, LightMode::Static);
 }
 
 void LaunchPad::setLeds(unsigned char* leds, unsigned char length, Color color, LightMode mode)
@@ -297,4 +350,5 @@ void LaunchPad::resized()
     auto margin = 10;
     midi->setBounds(getLocalBounds());
     startButton.setBounds(margin, (getHeight() / 2), getWidth() - (2 * margin), 24);
+    offsetSelector.setBounds(margin, (getHeight() / 1.5), getWidth()/3 - (2 * margin), 24);
 }

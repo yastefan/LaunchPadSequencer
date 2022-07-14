@@ -18,7 +18,7 @@
 */
 enum Color
 {
-    Off = 0, White = 3, Red = 5, LightGreen = 24, LightPurple = 48, 
+    Off = 0, White = 3, Red = 5, LightGreen = 24, LightBlue = 40, LightPurple = 48, Orange = 108, LightYellow = 109
 };
 enum LightMode
 {
@@ -64,8 +64,9 @@ public:
 
     void setToProgrammerMode();
     void setToLiveMode();
+    void changeSequenceOffset();
     void setLed(unsigned char led, Color color, LightMode mode = LightMode::Static);
-    void setLeds(unsigned char* leds, unsigned char length, Color color, LightMode mode);
+    void setLeds(unsigned char* leds, unsigned char length, Color color, LightMode mode = LightMode::Static);
     void loadStep(int step);
     void sendOscMessages();
     void sendOscSequencesMessage(int sequenceNumber, int value);
@@ -75,12 +76,15 @@ private:
     int sequencerPads[8] = { 81, 82, 83, 84, 85, 86, 87, 88 };
     int sequencerSteps = 8;
     int currentStep = 0;
+    int sequenceOffset = 200;
+
     juce::OSCSender oscSender;
     TapStatus tapStatus;
     StepManager stepManager;
     std::unique_ptr<MidiComponent> midi;
 
     juce::TextButton startButton{ "Start" };
+    juce::TextEditor offsetSelector;
 
     void timerCallback() final;
     void handleIncomingMidiMessage(juce::MidiInput*, const juce::MidiMessage&) override;
