@@ -272,7 +272,7 @@ void LaunchPad::offAllSequences()
 {
     for (int i = 0; i < 24; i++)
     {
-        sendOscSequencesMessage(MidiNumberToSequenceNumber(i)+sequenceOffset, 0);
+        sendOscSequencesMessage(i + sequenceOffset, 0);
     }
 }
 
@@ -315,7 +315,7 @@ void LaunchPad::timerCallback() {
     else
         currentStep = 0;
     setLed(sequencerPads[currentStep], Color::Red);
-    oscSender.send("/sequencer/Beat", currentStep);
+    //oscSender.send("/sequencer/Beat", currentStep);
     sendOscMessages();
 };
 
@@ -444,7 +444,6 @@ void LaunchPad::loadPage(int page)
         setLed(59, Color::Off);
         break;
     case 3:
-        offAllSequences();
         setLed(89, Color::Off);
         setLed(79, Color::Off);
         setLed(69, Color::Off);
