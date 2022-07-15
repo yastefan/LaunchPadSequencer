@@ -48,6 +48,8 @@ public:
     void changePage(int page);
     void changeStep(int step);
     int toggleLed(int led, int value = 1);
+    void copySteps();
+    void deleteSteps();
 };
 
 class LaunchPad : public juce::Component,
@@ -68,13 +70,16 @@ public:
     void setLed(unsigned char led, Color color, LightMode mode = LightMode::Static);
     void setLeds(unsigned char* leds, unsigned char length, Color color, LightMode mode = LightMode::Static);
     void loadStep(int step);
+    void loadPage(int page);
+    void checkIpBlock();
+    void connectOsc();
     void sendOscMessages();
     void sendOscSequencesMessage(int sequenceNumber, int value);
-    int LaunchPad::MidiNumberToSequenceNumber(int midiNumber);
+    int MidiNumberToSequenceNumber(int midiNumber);
     void offAllSequences();
 private:
     int sequencerPads[8] = { 81, 82, 83, 84, 85, 86, 87, 88 };
-    int sequencerSteps = 8;
+    int sequencerSteps[4] = {4, 4, 4, 4};
     int currentStep = 0;
     int sequenceOffset = 200;
 
@@ -83,8 +88,15 @@ private:
     StepManager stepManager;
     std::unique_ptr<MidiComponent> midi;
 
-    juce::TextButton startButton{ "Start" };
+    juce::TextButton startButton{ "Sequencer" };
+    juce::TextButton liveButton{ "Live" };
     juce::TextEditor offsetSelector;
+    juce::TextEditor ip1Selector;
+    juce::TextEditor ip2Selector;
+    juce::TextEditor ip3Selector;
+    juce::TextEditor ip4Selector;
+    juce::TextEditor portSelector;
+    juce::TextButton connectButton{ "Connect" };
 
     void timerCallback() final;
     void handleIncomingMidiMessage(juce::MidiInput*, const juce::MidiMessage&) override;

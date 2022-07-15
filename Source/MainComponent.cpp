@@ -3,7 +3,7 @@
 //==============================================================================
 MainComponent::MainComponent()
 {
-    setSize(732, 400);
+    setSize(500, 400);
     addAndMakeVisible(launchPad);
 }
 
@@ -15,7 +15,7 @@ MainComponent::~MainComponent()
 //==============================================================================
 void MainComponent::paint (juce::Graphics& g)
 {
-
+   
 }
 
 void MainComponent::resized()

@@ -32,7 +32,7 @@ MidiComponent::MidiComponent(juce::MidiInputCallback* callback) :
         updateDeviceList(false);
     };
 
-    setSize(732, 520);
+    setSize(500, 500);
 }
 
 MidiComponent::~MidiComponent()
@@ -47,7 +47,6 @@ MidiComponent::~MidiComponent()
 void MidiComponent::paint (juce::Graphics& g)
 {
     g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));   // clear the background
-
     g.setColour (juce::Colours::grey);
     g.drawRect (getLocalBounds(), 1);   // draw an outline around the component
 
@@ -70,7 +69,6 @@ void MidiComponent::resized()
         (getHeight() / 2) - ((4 * margin) + 24 + 24));
     refreshButton.setBounds(margin, (getHeight() / 2) - (margin + 24),
         getWidth() - (2 * margin), 24);
-
 }
 
 void MidiComponent::openDevice(bool isInput, int index)
