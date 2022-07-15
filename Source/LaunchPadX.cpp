@@ -14,7 +14,7 @@ LaunchPad::LaunchPad() :
     midi(new MidiComponent(this))
 {
     addAndMakeVisible(*midi);
-    addAndMakeVisible(startButton);
+    addAndMakeVisible(sequencerButton);
     addAndMakeVisible(liveButton);
     addAndMakeVisible(offsetSelector);
 
@@ -43,14 +43,14 @@ LaunchPad::LaunchPad() :
     portSelector.setText("9005");
 
     offsetSelector.onTextChange = [this] {changeSequenceOffset(); };
-    startButton.onClick = [this] { setToProgrammerMode(); };
+    sequencerButton.onClick = [this] { setToProgrammerMode(); };
     liveButton.onClick = [this] { setToLiveMode(); };
     connectButton.onClick = [this] { connectOsc(); };
 
     oscSender.connect("127.0.0.1", 9005);
     startTimer((60 * 1000) / 120);
     
-    setSize(500, 500);
+    setSize(500, 200);
 }
 
 LaunchPad::~LaunchPad()
@@ -492,14 +492,17 @@ void LaunchPad::paint(juce::Graphics& g)
 void LaunchPad::resized()
 {
     auto margin = 10;
-    midi->setBounds(0, 0, getWidth(), getHeight());
-    startButton.setBounds(margin, (getHeight() / 2), getWidth()/2 - (2 * margin), 24);
-    liveButton.setBounds((getWidth()/2 + margin), (getHeight() / 2), getWidth() / 2 - (2 * margin), 24);
-    ip1Selector.setBounds(margin, (getHeight() / 2 + 24 + margin), getWidth() / 5 - (2 * margin), 24);
-    ip2Selector.setBounds((getWidth() / 5 + margin), (getHeight() / 2 + 24 + margin), getWidth() / 5 - (2 * margin), 24);
-    ip3Selector.setBounds((getWidth() / 5 * 2 + margin), (getHeight() / 2 + 24 + margin), getWidth() / 5 - (2 * margin), 24);
-    ip4Selector.setBounds((getWidth() / 5 * 3 + margin), (getHeight() / 2 + 24 + margin), getWidth() / 5 - (2 * margin), 24);
-    portSelector.setBounds((getWidth() / 5 * 4 + margin), (getHeight() / 2 + 24 + margin), getWidth() / 5 - (2 * margin), 24);
-    offsetSelector.setBounds(margin, (getHeight() / 2 + 48 + (2 * margin)), getWidth() / 5 - (2 * margin), 24);
-    connectButton.setBounds((getWidth() / 5 + margin), (getHeight() / 2 + 48 + (2 * margin)), getWidth() / 5 - (2 * margin), 24);
+    midi->setBounds(0, 0, getWidth(), getHeight()/1.75 - margin);
+    
+    ip1Selector.setBounds(margin, (getHeight() / 1.75 + margin), getWidth() / 5 - (2 * margin), 24);
+    ip2Selector.setBounds((getWidth() / 5 + margin), (getHeight() / 1.75 + margin), getWidth() / 5 - (2 * margin), 24);
+    ip3Selector.setBounds((getWidth() / 5 * 2 + margin), (getHeight() / 1.75 + margin), getWidth() / 5 - (2 * margin), 24);
+    ip4Selector.setBounds((getWidth() / 5 * 3 + margin), (getHeight() / 1.75 + margin), getWidth() / 5 - (2 * margin), 24);
+    portSelector.setBounds((getWidth() / 5 * 4 + margin), (getHeight() / 1.75 + margin), getWidth() / 5 - (2 * margin), 24);
+
+    offsetSelector.setBounds(margin, (getHeight() / 1.75 + 24 + (2 * margin)), getWidth() / 5 - (2 * margin), 24);
+    connectButton.setBounds((getWidth() / 5 + margin), (getHeight() / 1.75 + 24 + (2 * margin)), getWidth() / 5 - (2 * margin), 24);
+
+    sequencerButton.setBounds(margin, getHeight() - 24 - (2 * margin), getWidth() / 2 - (2 * margin), 24);
+    liveButton.setBounds((getWidth() / 2 + margin), getHeight() - 24 - (2 * margin), getWidth() / 2 - (2 * margin), 24);
 }

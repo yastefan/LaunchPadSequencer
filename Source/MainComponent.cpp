@@ -3,7 +3,7 @@
 //==============================================================================
 MainComponent::MainComponent()
 {
-    setSize(500, 400);
+    setSize(500, 320);
     addAndMakeVisible(launchPad);
 }
 

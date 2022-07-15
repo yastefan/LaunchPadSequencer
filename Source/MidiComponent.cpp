@@ -63,11 +63,11 @@ void MidiComponent::resized()
         (getWidth() / 2) - (2 * margin), 24);
     midiInputSelector->setBounds(margin, (2 * margin) + 24,
         (getWidth() / 2) - (2 * margin),
-        (getHeight() / 2) - ((4 * margin) + 24 + 24));
+        getHeight() - (4 * margin) - 24 - 24);
     midiOutputSelector->setBounds((getWidth() / 2) + margin, (2 * margin) + 24,
         (getWidth() / 2) - (2 * margin),
-        (getHeight() / 2) - ((4 * margin) + 24 + 24));
-    refreshButton.setBounds(margin, (getHeight() / 2) - (margin + 24),
+        getHeight() - (4 * margin) - 24 - 24);
+    refreshButton.setBounds(margin, getHeight() - margin - 24,
         getWidth() - (2 * margin), 24);
 }
 

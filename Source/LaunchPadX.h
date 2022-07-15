@@ -88,7 +88,7 @@ private:
     StepManager stepManager;
     std::unique_ptr<MidiComponent> midi;
 
-    juce::TextButton startButton{ "Sequencer" };
+    juce::TextButton sequencerButton{ "Sequencer" };
     juce::TextButton liveButton{ "Live" };
     juce::TextEditor offsetSelector;
     juce::TextEditor ip1Selector;
