@@ -17,7 +17,7 @@ void MainComponent::paint (juce::Graphics& g)
 {
     g.setColour(juce::Colours::white);
     g.setFont(18.0f);
-    g.drawText("Schmiddis Light Sequencer", 0, 0, getWidth(), 40, juce::Justification::centredLeft, true);
+    g.drawText("Schmiddis Light Sequencer", 10, 2, getWidth(), 40, juce::Justification::centredLeft, true);
 }
 
 void MainComponent::resized()

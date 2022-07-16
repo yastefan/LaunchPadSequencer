@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="pDUtxL" name="Sequencer" projectType="guiapp" useAppConfig="0"
-              addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1">
-  <MAINGROUP id="yErL9l" name="Sequencer">
+<JUCERPROJECT id="pDUtxL" name="Schmiddis Light Sequencer" projectType="guiapp"
+              useAppConfig="0" addUsingNamespaceToJuceHeader="0" displaySplashScreen="1"
+              jucerFormatVersion="1" version="0.9.0">
+  <MAINGROUP id="yErL9l" name="Schmiddis Light Sequencer">
     <GROUP id="{93DD56F4-CF0F-FDDF-E061-34E337946287}" name="Source">
       <FILE id="MZwgKQ" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
       <FILE id="WGiAwc" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
