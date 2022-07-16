@@ -3,7 +3,7 @@
 //==============================================================================
 MainComponent::MainComponent()
 {
-    setSize(500, 320);
+    setSize(500, 360);
     addAndMakeVisible(launchPad);
 }
 
@@ -15,10 +15,13 @@ MainComponent::~MainComponent()
 //==============================================================================
 void MainComponent::paint (juce::Graphics& g)
 {
-   
+    g.setColour(juce::Colours::white);
+    g.setFont(18.0f);
+    g.drawText("Schmiddis Light Sequencer", 0, 0, getWidth(), 40, juce::Justification::centredLeft, true);
 }
 
 void MainComponent::resized()
 {
-    launchPad.setBounds(getLocalBounds());
+    int margin = 2;
+    launchPad.setBounds(margin, 40, getWidth()-(margin*2), getHeight() - 40);
 }
