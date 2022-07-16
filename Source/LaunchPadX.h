@@ -29,6 +29,11 @@ enum LaunchKeys
     ResyncKey = 17,
     TapKey = 18
 };
+enum GrandButtons
+{
+    Flash = 1,
+    Swop = 2
+};
 struct TapStatus
 {
     int currentBpmTime = (60 * 1000) / 128;
@@ -74,7 +79,7 @@ public:
     void checkIpBlock();
     void connectOsc();
     void sendOscMessages();
-    void sendOscSequencesMessage(int sequenceNumber, int value);
+    void sendOscSequencesMessage(int sequenceNumber, int value, GrandButtons = GrandButtons::Flash);
     int MidiNumberToSequenceNumber(int midiNumber);
     void offAllSequences();
 private:
