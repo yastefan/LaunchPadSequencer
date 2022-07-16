@@ -129,6 +129,7 @@ void LaunchPad::handleIncomingMidiMessage(juce::MidiInput* /*source*/, const juc
                 setLed(noteNumber, Color::Red);
             else
                 setLed(noteNumber, Color::LightGreen);
+                sendOscSequencesMessage(MidiNumberToSequenceNumber(noteNumber) + sequenceOffset, 0);
         }
         else if ((noteNumber > 24 && noteNumber < 29) || (noteNumber > 34 && noteNumber < 39))
         {
