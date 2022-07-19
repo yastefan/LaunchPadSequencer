@@ -61,7 +61,7 @@ LaunchPad::~LaunchPad()
 
 int TapStatus::getBpmTime()
 {
-    int roundedBpm = juce::roundFloatToInt(60000.0/currentBpmTime);
+    int roundedBpm = juce::roundToInt(60000.0/currentBpmTime);
     DBG(" Raw BPM: " << (60000.0 / currentBpmTime) << "    Rounded BPM: " << roundedBpm);
     return 60000 / roundedBpm;
 }
@@ -86,6 +86,8 @@ int StepManager::toggleLed(int led, int value)
             statusStorage[activePage][activeStep][led] = value;
         return statusStorage[activePage][activeStep][led];
     }
+    else
+        return 0;
 }
 void StepManager::copySteps()
 {
@@ -329,6 +331,8 @@ int LaunchPad::MidiNumberToSequenceNumber(int midiNumber) {
         return midiNumber + 19;
     else if (midiNumber < 19 && midiNumber > 10)
         return midiNumber + 37;
+    else
+        return 0;
 }
 
 void LaunchPad::timerCallback() {
@@ -522,6 +526,11 @@ void LaunchPad::setLeds(unsigned char* leds, unsigned char length, Color color, 
 //==============================================================================
 void LaunchPad::paint(juce::Graphics& g)
 {
+    auto area = getLocalBounds();
+    auto midiArea = area.removeFromTop(getHeight() / 1.9);
+    auto ipArea = area.removeFromTop(69);
+    g.setColour(juce::Colours::orange);
+    g.fillRect(ipArea);
     /*
     juce::Line<float> line(juce::Point<float>(0, 400), juce::Point<float>(getWidth(), 400));
     g.setColour(juce::Colours::palegreen);
@@ -545,13 +554,13 @@ void LaunchPad::resized()
     ip4Selector.setBounds(ipArea.removeFromLeft(columnSize).reduced(margin));
     portSelector.setBounds(ipArea.removeFromLeft(columnSize).reduced(margin));
 
-    auto buttonArea = area.removeFromTop(34);
-    offsetSelector.setBounds(buttonArea.removeFromLeft(columnSize).reduced(margin));
-    connectButton.setBounds(buttonArea.removeFromLeft(columnSize).reduced(margin));
+    auto ipArea2 = area.removeFromTop(34);
+    offsetSelector.setBounds(ipArea2.removeFromLeft(columnSize).reduced(margin));
+    connectButton.setBounds(ipArea2.removeFromLeft(columnSize).reduced(margin));
 
-    auto button2Area = area.removeFromTop(34);
-    sequencerButton.setBounds(button2Area.removeFromLeft(getWidth() / 2).reduced(margin));
-    liveButton.setBounds(button2Area.removeFromLeft(getWidth() / 2).reduced(margin));
+    auto buttonArea = area.removeFromTop(34);
+    sequencerButton.setBounds(buttonArea.removeFromLeft(getWidth() / 2).reduced(margin));
+    liveButton.setBounds(buttonArea.removeFromLeft(getWidth() / 2).reduced(margin));
     //connectButton.setBounds((getWidth() / 5 + margin), (getHeight() / 1.75 + 24 + (2 * margin)), getWidth() / 5 - (2 * margin), 24);
 
     //sequencerButton.setBounds(margin, getHeight() - 24 - (2 * margin), getWidth() / 2 - (2 * margin), 24);
