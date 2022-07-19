@@ -59,6 +59,13 @@ LaunchPad::~LaunchPad()
     setToLiveMode();
 }
 
+int TapStatus::getBpmTime()
+{
+    int roundedBpm = juce::roundFloatToInt(60000.0/currentBpmTime);
+    DBG(" Raw BPM: " << (60000.0 / currentBpmTime) << "    Rounded BPM: " << roundedBpm);
+    return 60000 / roundedBpm;
+}
+
 void StepManager::changePage(int page) 
 {
     if (page >= 0 && page < 4) 
@@ -125,11 +132,16 @@ void LaunchPad::handleIncomingMidiMessage(juce::MidiInput* /*source*/, const juc
         else if (noteNumber > 40 && noteNumber < 79)
         {
             DBG("Exec: NoteNumber: " + std::to_string(noteNumber));
-            if ( stepManager.toggleLed(noteNumber) )
-                setLed(noteNumber, Color::Red);
+            if (stepManager.toggleLed(noteNumber))
+            {
+                setLed(noteNumber, Color::White);
+                //sendOscSequencesMessage(MidiNumberToSequenceNumber(noteNumber) + sequenceOffset, 1);
+            }
             else
+            {
                 setLed(noteNumber, Color::LightGreen);
-                sendOscSequencesMessage(MidiNumberToSequenceNumber(noteNumber) + sequenceOffset, 0);
+                //sendOscSequencesMessage(MidiNumberToSequenceNumber(noteNumber) + sequenceOffset, 0);
+            }
         }
         else if ((noteNumber > 24 && noteNumber < 29) || (noteNumber > 34 && noteNumber < 39))
         {
@@ -159,12 +171,28 @@ void LaunchPad::handleIncomingMidiMessage(juce::MidiInput* /*source*/, const juc
             else
             {
                 setLed(noteNumber, Color::Red);
-                startTimer(tapStatus.currentBpmTime);
+                startTimer(tapStatus.getBpmTime());
             }
         }
         else if (noteNumber == 11) 
-        {
             setToLiveMode();
+        else if (noteNumber == 16)
+        {
+            //tapStatus.currentBpmTime = tapStatus.getBpmTime() / 2;
+            //startTimer(tapStatus.getBpmTime() / 2);
+        }
+        else if (noteNumber == 15)
+        {
+            //tapStatus.currentBpmTime = tapStatus.getBpmTime() * 2;
+            //startTimer(tapStatus.getBpmTime() * 2);
+        }
+        else if (noteNumber == 14)
+        {
+
+        }   
+        else if (noteNumber == 13)
+        {
+
         }
     }
     else if (message.isNoteOff())
@@ -271,17 +299,16 @@ void LaunchPad::sendOscMessages()
 
 void LaunchPad::offAllSequences()
 {
-    for (int i = 0; i < 32; i++)
-    {
-        sendOscSequencesMessage(i + sequenceOffset, 0);
-    }
+    std::string message = "Off Sequence " + std::to_string(sequenceOffset) + " Thru " + std::to_string(sequenceOffset + 32);
+    juce::OSCArgument argument(message);
+    oscSender.send("/cmd", argument);
 }
 
 
 void LaunchPad::sendOscSequencesMessage(int sequenceNumber, int value, GrandButtons grandButton) {
     std::string message_address = "/13.13.1.5." + std::to_string(sequenceNumber);
 
-    juce::String b = (grandButton == GrandButtons::Swop) ? "Swop" : "Flash";
+    juce::String b = (grandButton == GrandButtons::Swop) ? "Swop" : "Temp";
     juce::OSCArgument button(b);
 
     oscSender.send(message_address.c_str(), button, value);
@@ -319,40 +346,40 @@ void LaunchPad::timerCallback() {
     else
         currentStep = 0;
     setLed(sequencerPads[currentStep], Color::Red);
+    loadStep(currentStep, false);
     //oscSender.send("/sequencer/Beat", currentStep);
     sendOscMessages();
 };
 
 void LaunchPad::resetTimer()
 {
-    stopTimer();
+    startTimer(tapStatus.getBpmTime());
     if (currentStep < 4)
         setLed(sequencerPads[currentStep], Color::LightBlue);
     else
         setLed(sequencerPads[currentStep], Color::LightPurple);
     setLed(sequencerPads[0], Color::Red);
     currentStep = 0;
-    startTimer(tapStatus.currentBpmTime);
 }
 
 void LaunchPad::updateBpm()
 {
-    long int currentTime = juce::Time::currentTimeMillis();
-    long int timeSinceLastTap = currentTime - tapStatus.timeOfLastTap;
+    double currentTime = juce::Time::getMillisecondCounterHiRes();
+    double timeSinceLastTap = currentTime - tapStatus.timeOfLastTap;
 
     if (timeSinceLastTap < ((60 * 1000) / 50) && timeSinceLastTap > ((60 * 1000) / 280)) // time intervall is between 50 and 280 bpm
     {
         if (tapStatus.tapCount) {
             tapStatus.currentBpmTime = (tapStatus.currentBpmTime * tapStatus.tapCount + timeSinceLastTap) / (tapStatus.tapCount + 1);
+            tapStatus.tapCount++;
+            startTimer(tapStatus.getBpmTime());
         }
         else 
         {
             tapStatus.currentBpmTime = timeSinceLastTap;
             tapStatus.tapCount = 1;
         }
-        startTimer(tapStatus.currentBpmTime);
         tapStatus.timeOfLastTap = currentTime;
-        DBG(60000 / tapStatus.currentBpmTime);
     }
     else 
     {
@@ -371,6 +398,11 @@ void LaunchPad::setToProgrammerMode()
     setLed(12, Color::Red);
     setLed(94, Color::Red, LightMode::Pulse);
     setLed(98, Color::Red);
+
+    setLed(15, Color::LightBlue);
+    setLed(16, Color::LightBlue);
+    setLed(13, Color::LightGreen);
+    setLed(14, Color::LightGreen);
 
     setLed(11, Color::White);
 
@@ -399,7 +431,7 @@ void LaunchPad::setLed(unsigned char led, Color color, LightMode mode)
     unsigned char data[9]{ 0x00, 0x20, 0x29, 0x02, 0x0c, 0x03, (unsigned char)mode, (unsigned char)led, (unsigned char)color };
     midi->sendToOutputs(createSysExMessage(data, 9));
 }
-void LaunchPad::loadStep(int step)
+void LaunchPad::loadStep(int step, bool isStepSelection)
 {
     unsigned char ledsOn[80] = {};
     unsigned char ledsOff[80] = {};
@@ -412,17 +444,22 @@ void LaunchPad::loadStep(int step)
             index = row * 10 + column;
             if (stepManager.statusStorage[stepManager.activePage][step][index] > 0)
             {
+                if (!isStepSelection && stepManager.statusStorage[stepManager.activePage][stepManager.activeStep][index] > 0)
+                    continue;
                 ledsOn[ledsOnCount] = index;
                 ledsOnCount++;
             }
-            else
+            else if(stepManager.statusStorage[stepManager.activePage][stepManager.activeStep][index] < 1)
             {
                 ledsOff[ledsOffCount] = index;
                 ledsOffCount++;
             }
         }
     }
-    setLeds(ledsOn, ledsOnCount, Color::Red, LightMode::Static);
+    if(isStepSelection)
+        setLeds(ledsOn, ledsOnCount, Color::White, LightMode::Static);
+    else
+        setLeds(ledsOn, ledsOnCount, Color::Red, LightMode::Static);
     setLeds(ledsOff, ledsOffCount, Color::LightGreen, LightMode::Static);
 }
 void LaunchPad::loadPage(int page)
@@ -494,18 +531,29 @@ void LaunchPad::paint(juce::Graphics& g)
 
 void LaunchPad::resized()
 {
-    auto margin = 10;
-    midi->setBounds(0, 0, getWidth(), getHeight()/1.75 - margin);
-    
-    ip1Selector.setBounds(margin, (getHeight() / 1.75 + margin), getWidth() / 5 - (2 * margin), 24);
-    ip2Selector.setBounds((getWidth() / 5 + margin), (getHeight() / 1.75 + margin), getWidth() / 5 - (2 * margin), 24);
-    ip3Selector.setBounds((getWidth() / 5 * 2 + margin), (getHeight() / 1.75 + margin), getWidth() / 5 - (2 * margin), 24);
-    ip4Selector.setBounds((getWidth() / 5 * 3 + margin), (getHeight() / 1.75 + margin), getWidth() / 5 - (2 * margin), 24);
-    portSelector.setBounds((getWidth() / 5 * 4 + margin), (getHeight() / 1.75 + margin), getWidth() / 5 - (2 * margin), 24);
+    auto area = getLocalBounds();
+    auto margin = 5;
+    auto columnSize = getWidth() / 5;
 
-    offsetSelector.setBounds(margin, (getHeight() / 1.75 + 24 + (2 * margin)), getWidth() / 5 - (2 * margin), 24);
-    connectButton.setBounds((getWidth() / 5 + margin), (getHeight() / 1.75 + 24 + (2 * margin)), getWidth() / 5 - (2 * margin), 24);
+    midi->setBounds(area.removeFromTop(getHeight() / 1.9));
 
-    sequencerButton.setBounds(margin, getHeight() - 24 - (2 * margin), getWidth() / 2 - (2 * margin), 24);
-    liveButton.setBounds((getWidth() / 2 + margin), getHeight() - 24 - (2 * margin), getWidth() / 2 - (2 * margin), 24);
+    auto ipArea = area.removeFromTop(34);
+
+    ip1Selector.setBounds(ipArea.removeFromLeft(columnSize).reduced(margin));
+    ip2Selector.setBounds(ipArea.removeFromLeft(columnSize).reduced(margin));
+    ip3Selector.setBounds(ipArea.removeFromLeft(columnSize).reduced(margin));
+    ip4Selector.setBounds(ipArea.removeFromLeft(columnSize).reduced(margin));
+    portSelector.setBounds(ipArea.removeFromLeft(columnSize).reduced(margin));
+
+    auto buttonArea = area.removeFromTop(34);
+    offsetSelector.setBounds(buttonArea.removeFromLeft(columnSize).reduced(margin));
+    connectButton.setBounds(buttonArea.removeFromLeft(columnSize).reduced(margin));
+
+    auto button2Area = area.removeFromTop(34);
+    sequencerButton.setBounds(button2Area.removeFromLeft(getWidth() / 2).reduced(margin));
+    liveButton.setBounds(button2Area.removeFromLeft(getWidth() / 2).reduced(margin));
+    //connectButton.setBounds((getWidth() / 5 + margin), (getHeight() / 1.75 + 24 + (2 * margin)), getWidth() / 5 - (2 * margin), 24);
+
+    //sequencerButton.setBounds(margin, getHeight() - 24 - (2 * margin), getWidth() / 2 - (2 * margin), 24);
+    //liveButton.setBounds((getWidth() / 2 + margin), getHeight() - 24 - (2 * margin), getWidth() / 2 - (2 * margin), 24);
 }

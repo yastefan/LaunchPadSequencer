@@ -36,9 +36,11 @@ enum GrandButtons
 };
 struct TapStatus
 {
-    int currentBpmTime = (60 * 1000) / 128;
-    long int timeOfLastTap = 0;
+    double currentBpmTime = (60 * 1000) / 128;
+    double timeOfLastTap = 0;
     int tapCount = 0;
+
+    int getBpmTime();
 };
 
 class StepManager
@@ -74,7 +76,7 @@ public:
     void changeSequenceOffset();
     void setLed(unsigned char led, Color color, LightMode mode = LightMode::Static);
     void setLeds(unsigned char* leds, unsigned char length, Color color, LightMode mode = LightMode::Static);
-    void loadStep(int step);
+    void loadStep(int step, bool isStepSelection = true);
     void loadPage(int page);
     void checkIpBlock();
     void connectOsc();
