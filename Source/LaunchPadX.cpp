@@ -405,8 +405,6 @@ void LaunchPad::setToProgrammerMode()
 
     setLed(15, Color::LightBlue);
     setLed(16, Color::LightBlue);
-    setLed(13, Color::LightGreen);
-    setLed(14, Color::LightGreen);
 
     setLed(11, Color::White);
 
@@ -526,16 +524,9 @@ void LaunchPad::setLeds(unsigned char* leds, unsigned char length, Color color, 
 //==============================================================================
 void LaunchPad::paint(juce::Graphics& g)
 {
-    auto area = getLocalBounds();
-    auto midiArea = area.removeFromTop(getHeight() / 1.9);
-    auto ipArea = area.removeFromTop(69);
-    g.setColour(juce::Colours::orange);
-    g.fillRect(ipArea);
-    /*
-    juce::Line<float> line(juce::Point<float>(0, 400), juce::Point<float>(getWidth(), 400));
-    g.setColour(juce::Colours::palegreen);
-    g.drawLine(line, 2.0f);
-    */
+    g.setColour(juce::Colours::white);
+    g.setFont(18.0f);
+    g.drawText("Schmiddis Light Sequencer", 10, 2, getWidth(), 24, juce::Justification::centredLeft, true);
 }
 
 void LaunchPad::resized()
@@ -544,8 +535,9 @@ void LaunchPad::resized()
     auto margin = 5;
     auto columnSize = getWidth() / 5;
 
-    midi->setBounds(area.removeFromTop(getHeight() / 1.9));
+    auto bpmArea = area.removeFromTop(34);
 
+    midi->setBounds(area.removeFromTop(getHeight() / 1.9));
     auto ipArea = area.removeFromTop(34);
 
     ip1Selector.setBounds(ipArea.removeFromLeft(columnSize).reduced(margin));
@@ -556,13 +548,9 @@ void LaunchPad::resized()
 
     auto ipArea2 = area.removeFromTop(34);
     offsetSelector.setBounds(ipArea2.removeFromLeft(columnSize).reduced(margin));
-    connectButton.setBounds(ipArea2.removeFromLeft(columnSize).reduced(margin));
+    connectButton.setBounds(ipArea2.removeFromLeft(4*columnSize).reduced(margin));
 
     auto buttonArea = area.removeFromTop(34);
     sequencerButton.setBounds(buttonArea.removeFromLeft(getWidth() / 2).reduced(margin));
     liveButton.setBounds(buttonArea.removeFromLeft(getWidth() / 2).reduced(margin));
-    //connectButton.setBounds((getWidth() / 5 + margin), (getHeight() / 1.75 + 24 + (2 * margin)), getWidth() / 5 - (2 * margin), 24);
-
-    //sequencerButton.setBounds(margin, getHeight() - 24 - (2 * margin), getWidth() / 2 - (2 * margin), 24);
-    //liveButton.setBounds((getWidth() / 2 + margin), getHeight() - 24 - (2 * margin), getWidth() / 2 - (2 * margin), 24);
 }
