@@ -16,6 +16,8 @@
       <FILE id="C6RZDe" name="Sequencer.cpp" compile="1" resource="0" file="Source/Sequencer.cpp"/>
       <FILE id="MAoWOL" name="LaunchPadX.cpp" compile="1" resource="0" file="Source/LaunchPadX.cpp"/>
       <FILE id="nGfC9k" name="LaunchPadX.h" compile="0" resource="0" file="Source/LaunchPadX.h"/>
+      <FILE id="HfB4OO" name="Osc.cpp" compile="1" resource="0" file="Source/Osc.cpp"/>
+      <FILE id="eu8yk1" name="Osc.h" compile="0" resource="0" file="Source/Osc.h"/>
     </GROUP>
   </MAINGROUP>
   <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1"/>
