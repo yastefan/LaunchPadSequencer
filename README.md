@@ -20,3 +20,5 @@ For my setup I create custom pages with faders for GroupMaster and buttons for s
 ## Instruction manual
 
 ![manual](https://github.com/yastefan/LaunchPadSequencer/blob/main/Documentation/manual.png)
+
+<img align="right" src="Documentation/120bpm.gif">
