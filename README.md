@@ -16,3 +16,7 @@ SLPS is a step sequencer. You tap the beat and then the sequencer jumps to each 
 You take the 4 MB .exe file on your USB stick and run it on the computer your LaunchPad X is connected to. In the gui you can select your midi device at the top and the IP address and OSC port of GrandMa3 at the bottom. If GrandMA3 onPC is running on the same computer as SLPS you leave the IP 127.0.0.1.
 
 For my setup I create custom pages with faders for GroupMaster and buttons for swap effects on the LaunchPad and map (Midi -> OSC) them with the great program [Chataigne](https://github.com/benkuper/Chataigne). For this I can recommend the [grandMA3-Chataigne-Module](https://github.com/yastefan/grandMA3-Chataigne-Module). The sequencer surface can be opened via the gui of SLPS or via Midi (Channel 16, CC 100).
+
+## Instruction manual
+
+![manual](https://github.com/yastefan/LaunchPadSequencer/blob/main/Documentation/manual.png)
