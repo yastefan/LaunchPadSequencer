@@ -21,4 +21,4 @@ For my setup I create custom pages with faders for GroupMaster and buttons for s
 
 ![manual](https://github.com/yastefan/LaunchPadSequencer/blob/main/Documentation/manual.png)
 
-<img align="right" src="Documentation/120bpm.gif">
+<img align="right" src="Documentation/120bpm.gif" style="height:50%;"> Some Text gnfdsjn sdfgnk,fdenv lkdsmfg.kmdsfknmsdfkgnm,sdfgdfsgsdfvdsfgvbdfgbdfsgcxvdrsfgnvsd lsrd,fg fsdgmvdsfkfrm .vdasdasd as
