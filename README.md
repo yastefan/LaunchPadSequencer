@@ -21,4 +21,6 @@ For my setup I create custom pages with faders for GroupMaster and buttons for s
 
 ![manual](https://github.com/yastefan/LaunchPadSequencer/blob/main/Documentation/manual.png)
 
-<img align="right" src="Documentation/120bpm.gif" style="height:50%;"> Some Text gnfdsjn sdfgnk,fdenv lkdsmfg.kmdsfknmsdfkgnm,sdfgdfsgsdfvdsfgvbdfgbdfsgcxvdrsfgnvsd lsrd,fg fsdgmvdsfkfrm .vdasdasd as
+lkdsmfg.kmdsfknmsdfkgnm,sdfgdfsgsdfvdsfgvbdfgbdfsgcxvdrsfgnvsd lsrd,fg fsdgmvdsfkfrm .vdasdasd as
+lkdsmfg.kmdsfknmsdfkgnm,sdfgdfsgsdfvdsfgvbdfgbdfsgcxvdrsfgnvsd lsrd,fg fsdgmvdsfkfrm .vdasdasd as
+<img align="left" src="Documentation/120bpm.gif" width="200"> Some Text gnfdsjn sdfgnk,fdenv lkdsmfg.kmdsfknmsdfkgnm,sdfgdfsgsdfvdsfgvbdfgbdfsgcxvdrsfgnvsd lsrd,fg fsdgmvdsfkfrm .vdasdasd aslkdsmfg.kmdsfknmsdfkgnm,sdfgdfsgsdfvdsfgvbdfgbdfsgcxvdrsfgnvsd lsrd,fg fsdgmvdsfkfrm .vdasdasd aslkdsmfg.kmdsfknmsdfkgnm,sdfgdfsgsdfvdsfgvbdfgbdfsgcxvdrsfgnvsd lsrd,fg fsdgmvdsfkfrm .vdasdasd as
