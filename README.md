@@ -1,6 +1,6 @@
 # Schmiddis LaunchPad Sequencer (SLPS)
 
-Schmiddis LaunchPad Sequencer (SLPS) is a sequencer for the LaunchPad X, which can send OSC messages directly to GrandMA3. This makes it possible to play *GrandMA3 sequences* like an insturment and to create beat-accurate Chaser Live.
+Schmiddis LaunchPad Sequencer (SLPS) is a sequencer for the LaunchPad X, which can send OSC messages directly to GrandMA3. This makes it possible to play *GrandMA3Sequences* like an insturment and to create beat-accurate Chaser Live.
 
 ## But why?
 
@@ -9,7 +9,8 @@ The LaunchPad X is for me a good controller for club use, because it offers many
 
 ## What is SLPS exactly?
 
-SLPS is a step sequencer. You tap the beat and then the sequencer jumps to each beat one step further. For each step you can select different *GrandMA3 sequences*, which are triggered when the step is reached. In other words, instead of playing a kick, a hi-hat or other drums, with SLPS you play the dimmers and the position of your moving heads, your strobes and of course your blinders. This allows you to create a beat-synchronized mood on the floor and when the drop comes, you can of course fire your swap effects via extra buttons. 
+SLPS is a step sequencer. You tap the beat and then the sequencer jumps to each beat one step further. For each step you can select different *GrandMA3Sequences* (note the difference between Sequenze and *GrandMA3Sequence*... they are something completely different), which are triggered when the step is reached. In other words, instead of playing a kick, a hi-hat or other drums, with SLPS you play the dimmers and the position of your moving heads, your strobes and of course your blinders. This allows you to create a beat-synchronized mood on the floor and when the drop comes, you can of course fire your swap effects via extra buttons. 
+<img align="left" src="Documentation/120bpm.gif" width="200"> The example on the left shows a four step sequence, which triggers the *GrandMA3Sequence* 1 and 9 in the first step and the *GrandMA3Sequence* 9 in the third step. Assuming on the *GrandMA3Sequence* 1 is the dimmer of moving heads and on the 9 a movement for these, then the heads light up in the first step with a movement and in the third without a movement.
 
 ## How to use SLPS? 
 
@@ -20,7 +21,3 @@ For my setup I create custom pages with faders for GroupMaster and buttons for s
 ## Instruction manual
 
 ![manual](https://github.com/yastefan/LaunchPadSequencer/blob/main/Documentation/manual.png)
-
-lkdsmfg.kmdsfknmsdfkgnm,sdfgdfsgsdfvdsfgvbdfgbdfsgcxvdrsfgnvsd lsrd,fg fsdgmvdsfkfrm .vdasdasd as
-lkdsmfg.kmdsfknmsdfkgnm,sdfgdfsgsdfvdsfgvbdfgbdfsgcxvdrsfgnvsd lsrd,fg fsdgmvdsfkfrm .vdasdasd as
-<img align="left" src="Documentation/120bpm.gif" width="200"> Some Text gnfdsjn sdfgnk,fdenv lkdsmfg.kmdsfknmsdfkgnm,sdfgdfsgsdfvdsfgvbdfgbdfsgcxvdrsfgnvsd lsrd,fg fsdgmvdsfkfrm .vdasdasd aslkdsmfg.kmdsfknmsdfkgnm,sdfgdfsgsdfvdsfgvbdfgbdfsgcxvdrsfgnvsd lsrd,fg fsdgmvdsfkfrm .vdasdasd aslkdsmfg.kmdsfknmsdfkgnm,sdfgdfsgsdfvdsfgvbdfgbdfsgcxvdrsfgnvsd lsrd,fg fsdgmvdsfkfrm .vdasdasd as
