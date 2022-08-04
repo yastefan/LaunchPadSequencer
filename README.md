@@ -16,7 +16,7 @@ The above example shows a four step sequence, which triggers the *GrandMA3Sequen
 
 ## How to use SLPS? 
 
-You take the 4 MB .exe file on your USB stick and run it on the computer your LaunchPad X is connected to. <img align="left" src="Documentation/gui.png with=200"> In the gui you can select your midi device at the top and the IP address and OSC port of GrandMa3 at the bottom. If GrandMA3 onPC is running on the same computer as SLPS you leave the IP 127.0.0.1. The 200 next to the Connect button is the sequence offset for GrandMA3. 200 means that the first green button (top left) triggers the GrandMA3Sequence 200, the second 201 and so on.
+You take the 4 MB .exe file on your USB stick and run it on the computer your LaunchPad X is connected to. <img align="left" src="Documentation/gui.png" width="200"> In the gui you can select your midi device at the top and the IP address and OSC port of GrandMa3 at the bottom. If GrandMA3 onPC is running on the same computer as SLPS you leave the IP 127.0.0.1. The 200 next to the Connect button is the sequence offset for GrandMA3. 200 means that the first green button (top left) triggers the GrandMA3Sequence 200, the second 201 and so on.
 
 For my setup I create custom pages with faders for GroupMaster and buttons for swap effects on the LaunchPad and map (Midi -> OSC) them with the great program [Chataigne](https://github.com/benkuper/Chataigne). For this I can recommend the [grandMA3-Chataigne-Module](https://github.com/yastefan/grandMA3-Chataigne-Module). The sequencer surface can be opened via the gui of SLPS or via Midi (Channel 16, CC 100).
 
