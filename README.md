@@ -11,6 +11,7 @@ The LaunchPad X is for me a good controller for club use, because it offers many
 
 SLPS is a step sequencer. You tap the beat and then the sequencer jumps to each beat one step further. For each step you can select different *GrandMA3Sequences* (note the difference between Sequence and *GrandMA3Sequence*... they are something completely different), which are triggered when the step is reached. In other words, instead of playing a kick, a hi-hat or other drums, with SLPS you play the dimmers and the position of your moving heads, your strobes and your blinders. This allows you to create a beat-synchronized mood on the floor and when the drop comes, you can of course fire your swap effects via extra buttons. 
 <img align="left" src="Documentation/120bpm-grandma.gif">
+
 The above example shows a four step sequence, which triggers the *GrandMA3Sequence* 1 and 2 in the first step and the *GrandMA3Sequence* 2 in the third step. Assuming on the *GrandMA3Sequence* 1 is the dimmer of moving heads and on the 2 a color for these, then the heads light up white in the first step and red in the third step. Imagine you have a four to the floor beat and on the first and third beat is the clap, then the moving heads light up now always to the clap.
 
 ## How to use SLPS? 
