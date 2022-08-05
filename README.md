@@ -22,4 +22,9 @@ For my setup I create custom pages with faders for GroupMaster and buttons for s
 
 ## Instruction manual
 
+Below is a LaunchPad X with the SLPS running interface. The rows and columns are numbered from top to bottom and from left to right. Only the 8x8 matrix is considered (i.e. the transparent buttons), the outer (black buttons) also have functions, but these should be apparent from the graphic below.
+
 ![manual](https://github.com/yastefan/LaunchPadSequencer/blob/main/Documentation/manual.png)
+
+The top row symbolises the steps or the beats. The two-colour representation (blue and purple) in IDLE status is only for a better overview.
+A red light up of a button symbolises the playback of a step. A white glow of the key indicates that the step is selected for editing.
